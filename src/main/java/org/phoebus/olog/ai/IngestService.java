@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 @Service
 public class IngestService {
-    //azure only allowed up to 96 per bach
+    // azure only allowed up to 96 entries per batch
     private static final int PAGE_SIZE = 50;
     private static final int BATCH_SIZE = 50;
     private static final Logger logger = LoggerFactory.getLogger(IngestService.class);
@@ -100,7 +100,6 @@ public class IngestService {
         totalIngested += hits.size();
         logger.info("Current ingest total: {}", totalIngested);
 
-        //lastId = (String) hits.get(hits.size() - 1).source().get("id");
         lastId = toString(hits.get(hits.size() - 1).source().get("id"));
         if (hits.size() < PAGE_SIZE) break;
     }

@@ -1,3 +1,4 @@
+// temporary work around for spring-boot version currently used in community (v- 3.5.7), but not needed for version 4+
 package org.phoebus.olog.ai;
 
 import com.fasterxml.jackson.databind.MapperFeature;

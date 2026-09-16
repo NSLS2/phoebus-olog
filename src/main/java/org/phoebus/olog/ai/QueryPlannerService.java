@@ -46,7 +46,7 @@ public class QueryPlannerService {
             AND: 'AND' | 'and' | '&&'; OR: 'OR' | 'or' | '||';
             IN: 'IN' | 'in'; NIN: 'NIN' | 'nin'; NOT: 'NOT' | 'not';
             IS: 'IS' | 'is'; NULL: 'NULL' | 'null'; NOT NULL: 'NOT NULL' | 'not null';
-            -If a term sounds like it could be metadata but is NOT in the allowed lists, treat 
+            - If a term sounds like it could be metadata but is NOT in the allowed lists, treat 
             it as semantic search content and do NOT include it in the filter expression and DO NOT 
             deviant from the approved list.
 
