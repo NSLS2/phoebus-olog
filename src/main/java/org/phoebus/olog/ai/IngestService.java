@@ -8,24 +8,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.phoebus.olog.entity.Log;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.elasticsearch.ElasticsearchVectorStore;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
-
-import org.phoebus.olog.entity.Log;
-import org.phoebus.olog.entity.State;
-import org.phoebus.olog.entity.Level;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 public class IngestService {
@@ -252,4 +249,3 @@ private OperationLogDocument flattenLog(Log log) {
         }
     }
 }
-

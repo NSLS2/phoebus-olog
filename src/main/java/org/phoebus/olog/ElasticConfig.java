@@ -1,5 +1,29 @@
 package org.phoebus.olog;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import org.apache.http.HttpHost;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestClientBuilder;
+import org.phoebus.olog.entity.Logbook;
+import org.phoebus.olog.entity.Property;
+import org.phoebus.olog.entity.Tag;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.Refresh;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
@@ -12,28 +36,6 @@ import co.elastic.clients.json.jackson.JacksonJsonpMapper;
 import co.elastic.clients.transport.ElasticsearchTransport;
 import co.elastic.clients.transport.endpoints.BooleanResponse;
 import co.elastic.clients.transport.rest_client.RestClientTransport;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.http.HttpHost;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
-import org.phoebus.olog.entity.Logbook;
-import org.phoebus.olog.entity.Tag;
-import org.phoebus.olog.entity.Property;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 /**
@@ -182,16 +184,11 @@ public class ElasticConfig {
                 request.waitForActiveShards() != null ? request.waitForActiveShards()._toJsonString() : null
         ));
     }
-    
-    //START OF EDITS 
-    /** 
-     * Exposing the RestClient as a Spring Bean because
-     * ElasticsearchVectorStore requires it to be injected directly
-     **/
 
+    // Exposing the RestClient as a Spring Bean because ElasticsearchVectorStore requires it to be injected directly
     private RestClient httpClient;
 
-    // new bean — just extracts what was already inside getClient()
+    // New bean — just extracts what was already inside getClient()
     @Bean({"restClient"})
     public RestClient getRestClient() {
         if (httpClient == null) {
@@ -224,21 +221,8 @@ public class ElasticConfig {
                     ES_HTTP_CONNECT_TIMEOUT_MS,
                     ES_HTTP_SOCKET_TIMEOUT_MS
             ));
-            // RestClient httpClient = RestClient.builder(new HttpHost(host, port, protocol))
-            //         .setRequestConfigCallback(builder ->
-            //                 builder.setConnectTimeout(ES_HTTP_CONNECT_TIMEOUT_MS)
-            //                         .setSocketTimeout(ES_HTTP_SOCKET_TIMEOUT_MS)
-            //         )
-            //         .setHttpClientConfigCallback(builder ->
-            //                 // Avoid timeout problems
-            //                 // https://github.com/elastic/elasticsearch/issues/65213
-            //                 builder.setKeepAliveStrategy((response, context) -> ES_HTTP_CLIENT_KEEP_ALIVE_TIMEOUT_MS)
-            //         )
-            //         .build();
-
             // Create the Java API Client with the same low level client
             ElasticsearchTransport transport = new RestClientTransport(
-                    //httpClient,
                     getRestClient(), // use the same RestClient instance instead of creating a new one
                     new JacksonJsonpMapper()
             );
@@ -251,7 +235,6 @@ public class ElasticConfig {
         }
         return client;
     }
-    // END OF EDITS 
 
     /**
      * Create the olog indices and templates if they don't exist

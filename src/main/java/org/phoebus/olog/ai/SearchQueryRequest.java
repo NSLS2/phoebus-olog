@@ -85,4 +85,3 @@ public class SearchQueryRequest {
         this.desc = desc;
     }
 }
-

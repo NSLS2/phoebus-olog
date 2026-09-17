@@ -1,7 +1,6 @@
 package org.phoebus.olog.ai;
 
 import java.util.List;
-//cleaned 
 public class OperationLogDocument {
 
     private String id;

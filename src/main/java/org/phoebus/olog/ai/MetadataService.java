@@ -1,14 +1,14 @@
 package org.phoebus.olog.ai;
 
-import org.phoebus.olog.TagRepository;
-import org.phoebus.olog.LogbookRepository;
-import org.phoebus.olog.entity.Tag;
-import org.phoebus.olog.entity.Logbook;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import org.phoebus.olog.LogbookRepository;
+import org.phoebus.olog.TagRepository;
+import org.phoebus.olog.entity.Logbook;
+import org.phoebus.olog.entity.Tag;
+import org.springframework.stereotype.Service;
 
 @Service
 public class MetadataService {
