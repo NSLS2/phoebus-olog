@@ -6,8 +6,30 @@
  */
 package org.phoebus.olog;
 
-import jakarta.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.security.Principal;
+import java.text.MessageFormat;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections4.CollectionUtils;
+import static org.phoebus.olog.OlogResourceDescriptors.LOG_RESOURCE_URI;
+import org.phoebus.olog.ai.LogEntryCreatedEvent;
 import org.phoebus.olog.entity.Attachment;
 import org.phoebus.olog.entity.Log;
 import org.phoebus.olog.entity.LogEntryGroupHelper;
@@ -21,7 +43,9 @@ import org.phoebus.olog.entity.websocket.MessageType;
 import org.phoebus.olog.entity.websocket.WebSocketMessage;
 import org.phoebus.olog.notification.LogEntryNotifier;
 import org.phoebus.olog.websocket.WebSocketService;
+import static org.phoebus.util.time.TimestampFormats.MILLI_PATTERN;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.task.TaskExecutor;
@@ -45,34 +69,12 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Schema;
-
-import java.io.IOException;
-import java.security.Principal;
-import java.text.MessageFormat;
-import java.time.Duration;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.stream.Collectors;
-
-import static org.phoebus.olog.OlogResourceDescriptors.LOG_RESOURCE_URI;
-import static org.phoebus.util.time.TimestampFormats.MILLI_PATTERN;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Resource for handling the requests to ../logs
@@ -123,6 +125,10 @@ public class LogResource {
 
     @Autowired
     private AttachmentsUploadUtil attachmentsUploadUtil;
+
+    @SuppressWarnings("unused")
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     /**
      * Custom HTTP header that client may send in order to identify itself. This is logged for some of the
@@ -356,6 +362,7 @@ public class LogResource {
         log = cleanMarkup(markup, log);
         addPropertiesFromProviders(log);
         Log newLogEntry = logRepository.save(log);
+        eventPublisher.publishEvent(new LogEntryCreatedEvent(this, newLogEntry));
         sendToNotifiers(newLogEntry);
 
         if (notifyWsClients) {
@@ -559,6 +566,7 @@ public class LogResource {
             persistedLog = cleanMarkup(markup, persistedLog);
 
             Log updatedLog = logRepository.update(persistedLog);
+            eventPublisher.publishEvent(new LogEntryCreatedEvent(this, updatedLog));
             if (notifyWsClients) {
                 webSocketService.sendMessageToClients(new WebSocketMessage(MessageType.LOG_ENTRY_UPDATED, persistedLog.getId().toString()));
             }
