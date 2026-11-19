@@ -56,6 +56,8 @@
         <elasticsearch.version>8.18.0</elasticsearch.version>
         <junit.version>5.8.2</junit.version>
         <springdoc.version>2.8.15</springdoc.version>
+        <!-- Must match the swagger-core-jakarta version used by springdoc.version -->
+        <swagger.version>2.2.41</swagger.version>
         <skipITs>true</skipITs>
         <skipITCoverage>true</skipITCoverage>
         <jacoco.skip>true</jacoco.skip>
@@ -84,6 +86,17 @@
                 <version>${spring-ai.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!--
+              Spring AI pulls an older swagger-annotations-jakarta that wins Maven's
+              nearest-wins resolution over the one springdoc's swagger-core needs, causing
+              NoSuchMethodError (e.g. Schema.$dynamicRef()) when /v3/api-docs is generated.
+              Do not remove, keep in sync with springdoc via swagger.version.
+            -->
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations-jakarta</artifactId>
+                <version>${swagger.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
